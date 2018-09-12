@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using MyStore.Web.Domain;
 
 namespace MyStore.Web.Controllers
 {
@@ -17,7 +18,17 @@ namespace MyStore.Web.Controllers
         };
 
         [HttpGet]
-        public IActionResult Get() => Ok(_products);
+        public IActionResult Get([FromQuery] BrowseProducts query)
+        {
+            var products = _products;
+            if (!string.IsNullOrWhiteSpace(query.Name))
+            {
+                products = products.Where(p => p.Name.Contains(query.Name)).ToList();
+            }
+            // more filters
+
+            return Ok(products);
+        }
 
         [HttpGet("{id}")]
         public IActionResult Get(Guid id)
@@ -41,23 +52,15 @@ namespace MyStore.Web.Controllers
         }
     }
 
-    public class CreateProduct
+    public class BrowseProducts
     {
         public string Name { get; set; }
         public decimal Price { get; set; }
     }
 
-    public class Product
+    public class CreateProduct
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
-        
-        public Product(Guid id, string name, decimal price)
-        {
-            Id = id;
-            Name = name;
-            Price = price;
-        }
     }
 }
