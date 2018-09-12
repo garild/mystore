@@ -24,7 +24,7 @@ namespace MyStore.Web.Controllers
         
         public IActionResult Contact()
         {
-            throw new Exception("oopss...");
+//            throw new Exception("oopss...");
             
             ViewData["Message"] = "Your contact page.";
 
