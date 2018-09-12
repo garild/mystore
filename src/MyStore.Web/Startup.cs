@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MyStore.Web.Framework;
 
 namespace MyStore.Web
@@ -35,6 +37,8 @@ namespace MyStore.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.Configure<AppOptions>(Configuration.GetSection("app"));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             var builder = new ContainerBuilder();
@@ -46,7 +50,8 @@ namespace MyStore.Web
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env,
-            IApplicationLifetime lifetime)
+            IApplicationLifetime lifetime, IOptions<AppOptions> appOptions,
+            ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -60,6 +65,7 @@ namespace MyStore.Web
 
 //            app.UseHttpsRedirection();
 
+            Console.WriteLine($"Started application: {appOptions.Value.Name}");
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();
             app.UseCookiePolicy();
