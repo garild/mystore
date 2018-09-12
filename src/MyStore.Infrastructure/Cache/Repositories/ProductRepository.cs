@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MyStore.Core.Domain;
+using MyStore.Core.Domain.Repositories;
+
+namespace MyStore.Infrastructure.Cache.Repositories
+{
+    public class ProductRepository : IProductRepository
+    {
+        private static readonly List<Product> _products = new List<Product>
+        {
+            new Product(Guid.NewGuid(), "Phones", "Samsung S8", 3000),
+            new Product(Guid.NewGuid(), "Phones", "IPhone", 5000),
+            new Product(Guid.NewGuid(), "Phones", "Xiaomi Mi6", 2000)
+        };
+
+        public async Task<Product> GetAsync(Guid id)
+            => await Task.FromResult(_products.SingleOrDefault(p => p.Id == id));
+
+        public async Task<IEnumerable<Product>> BrowseAsync(string name = "")
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return _products;
+            }
+
+            return await Task.FromResult(_products.Where(p => p.Name.Contains(name)));
+        }
+
+        public async Task AddAsync(Product product)
+        {
+            _products.Add(product);
+            await Task.CompletedTask;
+        }
+    }
+}

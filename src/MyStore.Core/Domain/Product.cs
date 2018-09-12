@@ -1,6 +1,6 @@
 using System;
 
-namespace MyStore.Web.Domain
+namespace MyStore.Core.Domain
 {
     public class Product
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using MyStore.Web.Domain;
+using MyStore.Core.Domain;
 using MyStore.Web.Models;
 
 namespace MyStore.Web.Controllers

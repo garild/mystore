@@ -1,13 +1,13 @@
 using System;
 
-namespace MyStore.Web.Domain
+namespace MyStore.Services.Carts.Dto
 {
-    public class CartItem
+    public class CartItemDto
     {
         public Guid ProductId { get; set; }
         public string ProductName { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal TotalAmount => Quantity * UnitPrice;
+        public decimal TotalAmount { get; set; }
     }
 }

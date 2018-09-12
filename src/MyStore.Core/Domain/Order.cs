@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyStore.Web.Domain
+namespace MyStore.Core.Domain
 {
+    // Agregat
     public class Order
     {
         public Guid Id { get; set; }

@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyStore.Infrastructure;
+using MyStore.Services;
 using MyStore.Web.Framework;
 using MyStore.Web.Services;
 
@@ -45,8 +47,11 @@ namespace MyStore.Web
 
             var builder = new ContainerBuilder();
             builder.Populate(services);
+            
             builder.RegisterAssemblyTypes(typeof(Startup).Assembly)
                 .AsImplementedInterfaces();
+            builder.RegisterModule<InfrastructureModule>();
+            builder.RegisterModule<ServicesModule>();
             
             Container = builder.Build();
 

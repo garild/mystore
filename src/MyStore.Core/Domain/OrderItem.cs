@@ -1,7 +1,8 @@
 using System;
 
-namespace MyStore.Web.Domain
+namespace MyStore.Core.Domain
 {
+    // Encja
     public class OrderItem
     {
         public Guid ProductId { get; set; }

@@ -1,7 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MyStore.Web.Domain;
-using MyStore.Web.Services;
+using MyStore.Services.Carts;
 
 namespace MyStore.Web.Controllers
 {
@@ -9,17 +9,17 @@ namespace MyStore.Web.Controllers
     [ApiController]
     public class CartController : Controller
     {
-        private readonly ICartProvider _cartProvider;
+        private readonly ICartService _cartService;
 
-        public CartController(ICartProvider cartProvider)
+        public CartController(ICartService cartService)
         {
-            _cartProvider = cartProvider;
+            _cartService = cartService;
         }
         
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var cart = _cartProvider.Get(Guid.Empty);
+            var cart = await _cartService.GetAsync(Guid.Empty);
             if (cart == null)
             {
                 return NotFound();
@@ -29,11 +29,9 @@ namespace MyStore.Web.Controllers
         }
 
         [HttpPost("items")]
-        public IActionResult Post(AddItemToCart request)
+        public async Task<IActionResult> Post(AddItemToCart request)
         {
-            var cart = _cartProvider.Get(Guid.Empty) ?? new Cart();
-            cart.AddItem(request.ProductId, request.Quantity);
-            _cartProvider.Set(cart);
+            await _cartService.AddItemAsync(Guid.Empty, request.ProductId, request.Quantity);
 
             return NoContent();
         }

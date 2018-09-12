@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Extensions.Caching.Memory;
-using MyStore.Web.Domain;
+using MyStore.Core.Domain;
 
 namespace MyStore.Web.Services
 {

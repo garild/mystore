@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MyStore.Web.Domain;
+using MyStore.Core.Domain;
+using MyStore.Core.Domain.Repositories;
 using MyStore.Web.Models;
 
 namespace MyStore.Web.Controllers
@@ -11,22 +13,18 @@ namespace MyStore.Web.Controllers
     [ApiController]
     public class ProductsController : Controller
     {
-        private static readonly List<Product> _products = new List<Product>
-        {
-            new Product(Guid.NewGuid(), "Phones", "Samsung S8", 3000),
-            new Product(Guid.NewGuid(), "Phones", "IPhone", 5000),
-            new Product(Guid.NewGuid(), "Phones", "Xiaomi Mi6", 2000)
-        };
+        private readonly List<Product> _products = new List<Product>();
+        private readonly IProductRepository _productRepository;
 
-        [HttpGet]
-        public IActionResult Get([FromQuery] BrowseProducts query)
+        public ProductsController(IProductRepository productRepository)
         {
-            var products = _products;
-            if (!string.IsNullOrWhiteSpace(query.Name))
-            {
-                products = products.Where(p => p.Name.Contains(query.Name)).ToList();
-            }
-            // more filters
+            _productRepository = productRepository;
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] BrowseProducts query)
+        {
+            var products = await _productRepository.BrowseAsync(query.Name);
 
             return Ok(products);
         }

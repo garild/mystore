@@ -1,5 +1,5 @@
 using System;
-using MyStore.Web.Domain;
+using MyStore.Core.Domain;
 
 namespace MyStore.Web.Services
 {
