@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyStore.Web.Framework;
+using MyStore.Web.Services;
 
 namespace MyStore.Web
 {
@@ -36,13 +37,17 @@ namespace MyStore.Web
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
+            services.AddMemoryCache();
+            services.AddResponseCaching();
             services.Configure<AppOptions>(Configuration.GetSection("app"));
-
+//            services.AddTransient<ICartProvider, CartProvider>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             var builder = new ContainerBuilder();
             builder.Populate(services);
+            builder.RegisterAssemblyTypes(typeof(Startup).Assembly)
+                .AsImplementedInterfaces();
+            
             Container = builder.Build();
 
             return new AutofacServiceProvider(Container);
@@ -65,6 +70,7 @@ namespace MyStore.Web
 
 //            app.UseHttpsRedirection();
 
+            app.UseResponseCaching();
             Console.WriteLine($"Started application: {appOptions.Value.Name}");
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();

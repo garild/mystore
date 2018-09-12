@@ -21,7 +21,7 @@ namespace MyStore.Web.Controllers
 
             return View();
         }
-
+        
         public IActionResult Contact()
         {
             throw new Exception("oopss...");
@@ -30,6 +30,11 @@ namespace MyStore.Web.Controllers
 
             return View();
         }
+
+        [HttpGet("date")]
+        [ResponseCache(Duration = 10, VaryByHeader = "X-Custom", VaryByQueryKeys = new []{"Q"})]
+        public IActionResult GetDate()
+            => Content(DateTime.Now.ToString());
 
         public IActionResult Privacy()
         {
