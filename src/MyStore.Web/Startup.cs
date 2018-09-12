@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyStore.Web.Framework;
 
 namespace MyStore.Web
 {
@@ -58,8 +59,19 @@ namespace MyStore.Web
             }
 
 //            app.UseHttpsRedirection();
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+//            app.Use(async (ctx, next) =>
+//            {
+//                Console.WriteLine("Start");
+//                await next();
+//                Console.WriteLine("End");
+//            });
+//
+//            app.Run(async ctx => { Console.WriteLine("RUN"); });
 
             app.UseMvc(routes =>
             {
