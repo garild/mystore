@@ -2,44 +2,29 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Services.Carts;
+using MyStore.Services.Carts.Commands;
+using MyStore.Services.Carts.Queries;
+using MyStore.Services.Messages;
 
 namespace MyStore.Web.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
-    public class CartController : Controller
+    public class CartController : BaseController
     {
-        private readonly ICartService _cartService;
-
-        public CartController(ICartService cartService)
+        public CartController(IDispatcher dispatcher) : base(dispatcher)
         {
-            _cartService = cartService;
         }
-        
+
         [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var cart = await _cartService.GetAsync(Guid.Empty);
-            if (cart == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(cart);
-        }
+        public async Task<IActionResult> Get([FromQuery] GetCart query)
+            => Single(await QueryAsync(query));
 
         [HttpPost("items")]
-        public async Task<IActionResult> Post(AddItemToCart request)
+        public async Task<IActionResult> Post(AddItemToCart command)
         {
-            await _cartService.AddItemAsync(Guid.Empty, request.ProductId, request.Quantity);
+            await SendAsync(command);
 
             return NoContent();
-        }
-
-        public class AddItemToCart
-        {
-            public Guid ProductId { get; set; }
-            public int Quantity { get; set; }
         }
     }
 }
