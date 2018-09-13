@@ -30,9 +30,9 @@ namespace MyStore.Web.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(Guid id)
+        public async Task<IActionResult> Get(Guid id)
         {
-            var product = _products.SingleOrDefault(p => p.Id == id);
+            var product = await _productRepository.GetAsync(id);
             if (product != null)
             {
                 return Ok(product);
@@ -42,10 +42,10 @@ namespace MyStore.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(CreateProduct request)
+        public async Task<IActionResult> Post(CreateProduct request)
         {
             var id = Guid.NewGuid();
-            _products.Add(new Product(id, request.Name, request.Category, request.Price));
+            await _productRepository.AddAsync(new Product(id, request.Name, request.Category, request.Price));
 
             return CreatedAtAction(nameof(Get), new {id}, null);
         }

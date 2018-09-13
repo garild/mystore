@@ -9,11 +9,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyStore.Infrastructure;
+using MyStore.Infrastructure.EF;
 using MyStore.Services;
 using MyStore.Web.Framework;
 using MyStore.Web.Services;
@@ -42,8 +44,13 @@ namespace MyStore.Web
             services.AddMemoryCache();
             services.AddResponseCaching();
             services.Configure<AppOptions>(Configuration.GetSection("app"));
+            services.Configure<SqlOptions>(Configuration.GetSection("sql"));
 //            services.AddTransient<ICartProvider, CartProvider>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddEntityFrameworkSqlServer()
+                .AddEntityFrameworkInMemoryDatabase()
+                .AddDbContext<MyStoreContext>();
 
             var builder = new ContainerBuilder();
             builder.Populate(services);
@@ -61,7 +68,7 @@ namespace MyStore.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env,
             IApplicationLifetime lifetime, IOptions<AppOptions> appOptions,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory, MyStoreContext context)
         {
             if (env.IsDevelopment())
             {
@@ -75,6 +82,9 @@ namespace MyStore.Web
 
 //            app.UseHttpsRedirection();
 
+//            context.Database.EnsureCreated();
+            context.Database.Migrate();
+            
             app.UseResponseCaching();
             Console.WriteLine($"Started application: {appOptions.Value.Name}");
             app.UseMiddleware<ErrorHandlerMiddleware>();

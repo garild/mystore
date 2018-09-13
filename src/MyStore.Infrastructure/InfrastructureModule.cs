@@ -1,4 +1,6 @@
 using Autofac;
+using MyStore.Core.Domain.Repositories;
+using MyStore.Infrastructure.EF.Repositories;
 
 namespace MyStore.Infrastructure
 {
@@ -8,6 +10,7 @@ namespace MyStore.Infrastructure
         {
             builder.RegisterAssemblyTypes(typeof(InfrastructureModule).Assembly)
                 .AsImplementedInterfaces();
+            builder.RegisterType<ProductRepository>().As<IProductRepository>();
         }
     }
 }
