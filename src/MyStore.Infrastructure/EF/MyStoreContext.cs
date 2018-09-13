@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MyStore.Core.Domain;
+using MyStore.Infrastructure.EF.Configurations;
 
 namespace MyStore.Infrastructure.EF
 {
@@ -13,6 +14,7 @@ namespace MyStore.Infrastructure.EF
             _sqlOptions = sqlOptions;
         }
         
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
 
@@ -32,6 +34,14 @@ namespace MyStore.Infrastructure.EF
 
             optionsBuilder.UseSqlServer(_sqlOptions.Value.ConnectionString, 
                 o => o.MigrationsAssembly("MyStore.Web"));
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.ApplyConfiguration(new CategoryConfiguration());
+            builder.ApplyConfiguration(new UserConfiguration());
+            builder.ApplyConfiguration(new ProductConfiguration());
         }
     }
 }

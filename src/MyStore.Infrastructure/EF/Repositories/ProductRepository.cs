@@ -17,7 +17,7 @@ namespace MyStore.Infrastructure.EF.Repositories
             _context = context;
         }
 
-        public async Task<Product> GetAsync(Guid id)
+        public async Task<Product> GetAsync(AggregateId id)
             => await _context.Products.SingleOrDefaultAsync(p => p.Id == id);
 
         public async Task<IEnumerable<Product>> BrowseAsync(string name = "")

@@ -11,12 +11,12 @@ namespace MyStore.Infrastructure.Cache.Repositories
     {
         private static readonly List<Product> _products = new List<Product>
         {
-            new Product(Guid.NewGuid(), "Phones", "Samsung S8", 3000),
-            new Product(Guid.NewGuid(), "Phones", "IPhone", 5000),
-            new Product(Guid.NewGuid(), "Phones", "Xiaomi Mi6", 2000)
+            new Product(Guid.NewGuid(), "Samsung S8", Guid.NewGuid(), 3000),
+            new Product(Guid.NewGuid(), "IPhone", Guid.NewGuid(), 5000),
+            new Product(Guid.NewGuid(), "Xiaomi Mi6", Guid.NewGuid(), 2000)
         };
 
-        public async Task<Product> GetAsync(Guid id)
+        public async Task<Product> GetAsync(AggregateId id)
             => await Task.FromResult(_products.SingleOrDefault(p => p.Id == id));
 
         public async Task<IEnumerable<Product>> BrowseAsync(string name = "")

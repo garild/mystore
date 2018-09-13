@@ -45,7 +45,7 @@ namespace MyStore.Web.Controllers
         public async Task<IActionResult> Post(CreateProduct request)
         {
             var id = Guid.NewGuid();
-            await _productRepository.AddAsync(new Product(id, request.Name, request.Category, request.Price));
+            await _productRepository.AddAsync(new Product(id, request.Name, request.CategoryId, request.Price));
 
             return CreatedAtAction(nameof(Get), new {id}, null);
         }
@@ -82,7 +82,8 @@ namespace MyStore.Web.Controllers
                 return View(viewModel);
             }
             var id = Guid.NewGuid();
-            _products.Add(new Product(id, viewModel.Name, viewModel.Category, viewModel.Price));
+            var categoryId = Guid.NewGuid();
+            _products.Add(new Product(id, viewModel.Name, categoryId, viewModel.Price));
 
             return RedirectToAction(nameof(GetView));
         }
@@ -98,6 +99,6 @@ namespace MyStore.Web.Controllers
     {
         public string Name { get; set; }
         public decimal Price { get; set; }
-        public string Category { get; set; }
+        public Guid CategoryId { get; set; }
     }
 }

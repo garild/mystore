@@ -1,19 +1,21 @@
-using System;
-
 namespace MyStore.Core.Domain
 {
     public class Product
     {
-        public Guid Id { get; set; }
+        public AggregateId Id { get; set; }
         public string Name { get; set; }
-        public string Category { get; set; }
+        public AggregateId CategoryId { get; set; }
         public decimal Price { get; set; }
+
+        private Product()
+        {
+        }
         
-        public Product(Guid id, string name, string category, decimal price)
+        public Product(AggregateId id, string name, AggregateId categoryId, decimal price)
         {
             Id = id;
             Name = name;
-            Category = category;
+            CategoryId = categoryId;
             Price = price;
         }
     }

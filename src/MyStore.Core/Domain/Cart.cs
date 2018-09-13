@@ -12,7 +12,7 @@ namespace MyStore.Core.Domain
         public Guid UserId { get; private set; }
         public IEnumerable<CartItem> Items => _items;
         public decimal TotalAmount => Items.Sum(i => i.TotalAmount);
-
+        
         public Cart(Guid userId)
         {
             UserId = userId;

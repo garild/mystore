@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -45,8 +46,17 @@ namespace MyStore.Web
             services.AddResponseCaching();
             services.Configure<AppOptions>(Configuration.GetSection("app"));
             services.Configure<SqlOptions>(Configuration.GetSection("sql"));
+            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 //            services.AddTransient<ICartProvider, CartProvider>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(c =>
+                {
+                    c.LoginPath = new PathString("/login");
+                    c.AccessDeniedPath = new PathString("/forbidden");
+                    c.ExpireTimeSpan = TimeSpan.FromDays(1);
+                });
 
             services.AddEntityFrameworkSqlServer()
                 .AddEntityFrameworkInMemoryDatabase()
@@ -82,10 +92,12 @@ namespace MyStore.Web
 
 //            app.UseHttpsRedirection();
 
-//            context.Database.EnsureCreated();
+            context.Database.EnsureCreated();
             context.Database.Migrate();
             
             app.UseResponseCaching();
+            app.UseAuthentication();
+            
             Console.WriteLine($"Started application: {appOptions.Value.Name}");
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();
