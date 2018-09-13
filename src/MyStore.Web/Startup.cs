@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,9 +18,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MyStore.Core.Domain;
 using MyStore.Infrastructure;
 using MyStore.Infrastructure.EF;
+using MyStore.Infrastructure.Jwt;
 using MyStore.Services;
 using MyStore.Web.Framework;
 using MyStore.Web.Services;
@@ -48,18 +52,34 @@ namespace MyStore.Web
             services.AddResponseCaching();
             services.Configure<AppOptions>(Configuration.GetSection("app"));
             services.Configure<SqlOptions>(Configuration.GetSection("sql"));
+            services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IPasswordHasher<User>, PasswordHasher<User>>();
 //            services.AddTransient<ICartProvider, CartProvider>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            var jwtSection = Configuration.GetSection("jwt");
+            var jwtOptions = new JwtOptions();
+            jwtSection.Bind(jwtOptions);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(c =>
+                {
+                    c.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidateAudience = jwtOptions.ValidateAudience,
+                        ValidateLifetime = jwtOptions.ValidateLifetime
+                    };
+                })
                 .AddCookie(c =>
                 {
                     c.LoginPath = new PathString("/login");
                     c.AccessDeniedPath = new PathString("/forbidden");
                     c.ExpireTimeSpan = TimeSpan.FromDays(1);
                 });
+            
 
             services.AddAuthorization(c => c.AddPolicy("admin", p => { p.RequireRole("admin"); }));
 

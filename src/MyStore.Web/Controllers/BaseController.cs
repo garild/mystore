@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Services.Messages;
@@ -23,6 +25,9 @@ namespace MyStore.Web.Controllers
 
             return Ok(model);
         }
+
+        protected Guid UserId =>
+            Guid.Parse(User.Claims.Single(c => c.Type == "userId").Value);
 
         protected async Task SendAsync<T>(T command) where T : ICommand
             => await _dispatcher.SendAsync(command);

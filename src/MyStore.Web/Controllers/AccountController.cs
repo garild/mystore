@@ -25,6 +25,14 @@ namespace MyStore.Web.Controllers
             _authenticator = authenticator;
             _userService = userService;
         }
+
+        [HttpPost("token")]
+        public async Task<IActionResult> Token([FromBody] LoginViewModel request)
+        {
+            await _userService.SignInAsync(request.Username, request.Password);
+            
+            return Ok(await _userService.CreateTokenAsync(request.Username));
+        }
         
         [HttpGet("sign-up")]
         public IActionResult SignUp()

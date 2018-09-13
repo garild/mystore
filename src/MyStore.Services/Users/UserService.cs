@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyStore.Core.Domain;
 using MyStore.Infrastructure.EF;
+using MyStore.Infrastructure.Jwt;
 
 namespace MyStore.Services.Users
 {
@@ -11,12 +13,15 @@ namespace MyStore.Services.Users
     {
         private readonly MyStoreContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IJwtHandler _jwtHandler;
 
         public UserService(MyStoreContext context,
-            IPasswordHasher<User> passwordHasher)
+            IPasswordHasher<User> passwordHasher,
+            IJwtHandler jwtHandler)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _jwtHandler = jwtHandler;
         }
 
         public async Task<string> GetRoleAsync(string username)
@@ -57,6 +62,17 @@ namespace MyStore.Services.Users
             {
                 throw new Exception("Invalid password.");
             }
+        }
+
+        public async Task<JsonWebToken> CreateTokenAsync(string username)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+            var claims = new Dictionary<string, string>
+            {
+                ["custom"] = "value"
+            };
+
+            return _jwtHandler.Create(user.Id, user.Username, user.Role, claims);
         }
     }
 }
