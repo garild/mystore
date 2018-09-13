@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Core.Domain;
+using MyStore.Services.Users;
 using MyStore.Web.Framework;
 using MyStore.Web.Models;
 
@@ -16,11 +17,13 @@ namespace MyStore.Web.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthenticator _authenticator;
-        private static readonly List<User> _users = new List<User>();
+        private readonly IUserService _userService;
 
-        public AccountController(IAuthenticator authenticator)
+        public AccountController(IAuthenticator authenticator,
+            IUserService userService)
         {
             _authenticator = authenticator;
+            _userService = userService;
         }
         
         [HttpGet("sign-up")]
@@ -32,19 +35,15 @@ namespace MyStore.Web.Controllers
         }
         
         [HttpPost("sign-up")]
-        public IActionResult SignUp(SignUpViewModel viewModel)
+        public async Task<IActionResult> SignUp(SignUpViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
                 return View(viewModel);
             }
-            _users.Add(new User
-            {
-                Id = Guid.NewGuid(),
-                Username = viewModel.Username,
-                Password = viewModel.Password,
-                Role = viewModel.Role
-            });
+
+            await _userService
+                .SignUpAsync(viewModel.Username, viewModel.Password, viewModel.Role);
 
             return RedirectToAction("Index", "Home");
         }
@@ -63,7 +62,9 @@ namespace MyStore.Web.Controllers
                 return View(viewModel);
             }
 
-            await _authenticator.SignInAsync(viewModel.Username, viewModel.Password);
+            await _userService.SignInAsync(viewModel.Username, viewModel.Password);
+            var role = await _userService.GetRoleAsync(viewModel.Username);
+            await _authenticator.SignInAsync(viewModel.Username, role);
 
             return RedirectToAction("Index", "Home");
         }

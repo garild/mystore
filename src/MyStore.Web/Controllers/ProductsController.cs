@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Core.Domain;
 using MyStore.Core.Domain.Repositories;
+using MyStore.Web.Framework;
 using MyStore.Web.Models;
 
 namespace MyStore.Web.Controllers
@@ -67,6 +69,7 @@ namespace MyStore.Web.Controllers
         }
 
         [HttpGet("create")]
+        [AdminAuth]
         public IActionResult Create()
         {
             var viewModel = new CreateProductViewModel();
@@ -75,6 +78,7 @@ namespace MyStore.Web.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize(Policy = "admin")]
         public IActionResult Create([FromForm] CreateProductViewModel viewModel)
         {
             if (!ModelState.IsValid)

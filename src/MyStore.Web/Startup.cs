@@ -9,12 +9,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyStore.Core.Domain;
 using MyStore.Infrastructure;
 using MyStore.Infrastructure.EF;
 using MyStore.Services;
@@ -47,6 +49,7 @@ namespace MyStore.Web
             services.Configure<AppOptions>(Configuration.GetSection("app"));
             services.Configure<SqlOptions>(Configuration.GetSection("sql"));
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IPasswordHasher<User>, PasswordHasher<User>>();
 //            services.AddTransient<ICartProvider, CartProvider>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -57,6 +60,8 @@ namespace MyStore.Web
                     c.AccessDeniedPath = new PathString("/forbidden");
                     c.ExpireTimeSpan = TimeSpan.FromDays(1);
                 });
+
+            services.AddAuthorization(c => c.AddPolicy("admin", p => { p.RequireRole("admin"); }));
 
             services.AddEntityFrameworkSqlServer()
                 .AddEntityFrameworkInMemoryDatabase()

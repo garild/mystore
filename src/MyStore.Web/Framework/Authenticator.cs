@@ -16,12 +16,12 @@ namespace MyStore.Web.Framework
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task SignInAsync(string username, string password)
+        public async Task SignInAsync(string username, string role)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, "user")
+                new Claim(ClaimTypes.Role, role)
             };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
