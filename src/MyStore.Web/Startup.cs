@@ -5,6 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Consul;
+using DShop.Common.Consul;
+using DShop.Common.Mvc;
+using DShop.Common.Redis;
+using DShop.Common.Swagger;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -26,11 +31,16 @@ using MyStore.Infrastructure.Jwt;
 using MyStore.Services;
 using MyStore.Web.Framework;
 using MyStore.Web.Services;
+using Serilog;
+using ErrorHandlerMiddleware = MyStore.Web.Framework.ErrorHandlerMiddleware;
+using ILogger = Serilog.ILogger;
 
 namespace MyStore.Web
 {
     public class Startup
     {
+
+        private static readonly ILogger Logger = Log.Logger;
         public IConfiguration Configuration { get; }
         public IContainer Container { get; private set; }
         
@@ -49,6 +59,8 @@ namespace MyStore.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
             services.AddMemoryCache();
+            services.AddRedis();
+            
             services.AddResponseCaching();
             services.Configure<AppOptions>(Configuration.GetSection("app"));
             services.Configure<SqlOptions>(Configuration.GetSection("sql"));
@@ -86,6 +98,11 @@ namespace MyStore.Web
             services.AddEntityFrameworkSqlServer()
                 .AddEntityFrameworkInMemoryDatabase()
                 .AddDbContext<MyStoreContext>();
+            
+            services.AddSingleton<IServiceId, ServiceId>();
+            services.AddConsul();
+
+            services.AddSwaggerDocs();
 
             var builder = new ContainerBuilder();
             builder.Populate(services);
@@ -103,9 +120,10 @@ namespace MyStore.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env,
             IApplicationLifetime lifetime, IOptions<AppOptions> appOptions,
-            ILoggerFactory loggerFactory, MyStoreContext context)
+            ILoggerFactory loggerFactory, MyStoreContext context,
+            IConsulClient consulClient)
         {
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || env.IsEnvironment("local"))
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -119,14 +137,17 @@ namespace MyStore.Web
 
             context.Database.EnsureCreated();
             context.Database.Migrate();
-            
+
+            app.UseSwaggerDocs();
             app.UseResponseCaching();
             app.UseAuthentication();
+            app.UseAllForwardedHeaders();
             
-            Console.WriteLine($"Started application: {appOptions.Value.Name}");
+            Logger.Information($"Started application: {appOptions.Value.Name}");
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseServiceId();
 
 //            app.Use(async (ctx, next) =>
 //            {
@@ -144,7 +165,12 @@ namespace MyStore.Web
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            lifetime.ApplicationStopped.Register(() => Container.Dispose());
+            var consulServiceId = app.UseConsul();
+            lifetime.ApplicationStopped.Register(() =>
+            {
+                consulClient.Agent.ServiceDeregister(consulServiceId);
+                Container.Dispose();
+            });
         }
     }
 }

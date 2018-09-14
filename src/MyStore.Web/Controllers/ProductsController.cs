@@ -24,7 +24,7 @@ namespace MyStore.Web.Controllers
         }
         
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] BrowseProducts query)
+        public async Task<ActionResult<Product>> Get([FromQuery] BrowseProducts query)
         {
             var products = await _productRepository.BrowseAsync(query.Name);
 
