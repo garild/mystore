@@ -1,0 +1,15 @@
+version: "3.5"
+
+services:
+  mystore.web:
+    image: spetz/mystore.web
+    container_name: mystore.web
+    ports:
+      - '5000:5000'
+    networks:
+      - mystore
+
+networks:
+  mystore:
+    name: mystore
+    external: true

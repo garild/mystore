@@ -1,0 +1,17 @@
+version: "3.5"
+
+services:
+  mssql:
+    image: microsoft/mssql-server-linux:2017-latest
+    container_name: mssql
+    ports:
+      - '1433:1433'
+    environment:
+      - 'ACCEPT_EULA=Y'
+      - 'SA_PASSWORD=Abcd1234!'
+    networks:
+      - mystore
+
+networks:
+  mystore:
+    name: mystore
