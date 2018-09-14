@@ -1,0 +1,34 @@
+resources:
+- repo: self
+queue:
+  name: Hosted Linux Preview
+#Your build pipeline references a secret variable named ‘docker.username’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references a secret variable named ‘docker.password’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
+variables:
+  docker.image: 'spetz/mystore.web'
+steps:
+- script: 'dotnet build -c Release' 
+  displayName: 'dotnet build'
+
+- script: './scripts/dotnet-test.sh' 
+  displayName: 'dotnet test'
+
+- script: './scripts/dotnet-test-e2e.sh' 
+  displayName: 'dotnet test e2e'
+  enabled: false
+
+- script: './scripts/dotnet-publish.sh' 
+  displayName: 'dotnet publish'
+
+- script: 'docker build -t $(docker.image) .' 
+  displayName: 'docker build'
+
+- script: 'docker tag $(docker.image) $(docker.tag)' 
+  displayName: 'docker tag'
+
+- script: 'docker login -u $(docker.username) -p $(docker.password)' 
+  displayName: 'docker login'
+
+- script: 'docker push $(docker.registry)' 
+  displayName: 'docker push'
+
